@@ -22,6 +22,7 @@ function solve( input: string, accommodateDiagonals = false ) {
     paths.forEach( path => {
         // if x1 === x2 or if y1 === y2, it's a straight line
         if ( [0,1].some(i => path[0][i] === path[1][i]) ) {
+            // one of these loops will execute exactly once
             rangeIncl( path[0][0], path[1][0] ).forEach(
                 x => rangeIncl( path[0][1], path[1][1] ).forEach(
                     y => grid[x][y]++
