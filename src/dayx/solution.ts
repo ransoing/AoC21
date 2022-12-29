@@ -1,6 +1,7 @@
 import { sum } from 'lodash';
 import { outputAnswers } from '../output-answers';
 import { officialInput, testInput } from './inputs';
+import { XYZ } from '../util/xyz';
 
 function parseInput( input: string ) {
     
