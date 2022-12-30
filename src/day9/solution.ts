@@ -38,10 +38,9 @@ outputAnswers(
         const visitedPoints = new Set<string>(); // XYZ strings
         points.forEach( p => {
             if ( (p.valueIn(map) ?? 9) !== 9 && !visitedPoints.has(p.toString()) ) {
-                const visited = p.bfs(
-                    p => p.neighbors(),
-                    (p, n) => ( n.valueIn(map) ?? 9 ) !== 9
-                );
+                const { visited } = p.bfs({
+                    canVisitNeighbor: n => ( n.valueIn(map) ?? 9 ) !== 9
+                });
                 Array.from( visited.values() ).forEach( v => visitedPoints.add(v) );
                 basinSizes.push( visited.size );
             }
