@@ -1,4 +1,4 @@
-import { isEqual, sum } from "lodash";
+import { sum } from 'lodash';
 
 type Coordinate = XYZ | number[];
 
@@ -82,12 +82,75 @@ export class XYZ {
         ]);
     }
 
+    /** Returns whether the coordinates of the XYZ object and another are the same */
     eq( c: Coordinate ): boolean {
         const xyz = XYZ.normalize( c );
         return xyz != null && this.x === xyz.x && this.y === xyz.y && this.z === xyz.z;
     }
 
+    /** Returns all neighbors in the same z plane */
+    neighbors( includeDiagonal = false ): XYZ[] {
+        const orthogonal = [ [1,0], [0,1], [-1,0], [0,-1] ];
+        const diagonal = [ [1,1], [1,-1], [-1,-1], [-1,1] ];
+        return orthogonal.concat( includeDiagonal ? diagonal : [] ).map( c => this.plus(c) );
+    }
+
+    /** Returns all neighbors in 3 dimensions */
+    neighbors3D( includeDiagonal = false ): XYZ[] {
+        const orthogonal = [ [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1] ];
+        const diagonal = [
+            [1,1,1],  [1,-1,1],  [-1,-1,1],  [-1,1,1],
+            [1,1,0],  [1,-1,0],  [-1,-1,0],  [-1,1,0],
+            [1,1,-1], [1,-1,-1], [-1,-1,-1], [-1,1,-1]
+        ];
+        return orthogonal.concat( includeDiagonal ? diagonal : [] ).map( c => this.plus(c) );
+    }
+
+    /** given a 2D or 3D array, returns the value at [y][x][z] in that array */
+    valueIn<T>( arr: T[][] ): T;
+    valueIn<T>( arr: T[][][] ): T;
+    valueIn<T>( arr: (T | T[])[][] ) {
+        const element2d = arr[this.y]?.[this.x];
+        return Array.isArray( element2d ) ? element2d?.[this.z] : element2d;
+    }
+
     toString(): string {
         return `${this.x},${this.y},${this.z}`;
+    }
+
+    /**
+     * Performs a breadth-first search starting at the point the method is called on.
+     * Returns the set of visited points. */
+    bfs(
+        /** a function to get the neighbors of this point */
+        getNeighbors: (p: XYZ) => XYZ[],
+        /** determines whether a neighbor point can be visited, in addition to normal checks of whether the point has already been visited */
+        canVisitNeighbor?: (p: XYZ, neighbor: XYZ) => boolean,
+        /** determines whether the BFS should stop when visiting a new point */
+        shouldStop?: (p: XYZ) => boolean,
+        /** performs some action on every point before it's visited */
+        tap?: (p: XYZ) => void,
+        /** returns the string to add to the 'visitedPoints' set */
+        getVisitedKey?: (p: XYZ) => string
+    ) {
+        canVisitNeighbor = canVisitNeighbor ?? ( () => true );
+        getVisitedKey = getVisitedKey ?? ( p => p.toString() );
+        const visitedPoints = new Set<string>(); // XYZ strings
+        const queue: XYZ[] = [ this ];
+        visitedPoints.add( getVisitedKey(this) );
+        while ( queue.length > 0 ) {
+            const currentPoint = queue.pop();
+            if ( shouldStop?.(currentPoint) ?? false ) {
+                break;
+            }
+            getNeighbors( currentPoint ).filter(
+                n => canVisitNeighbor( currentPoint, n ) && !visitedPoints.has( getVisitedKey(n) )
+            ).forEach( p => {
+                tap?.( p );
+                visitedPoints.add( getVisitedKey(p) );
+                queue.unshift( p );
+            });
+        }
+        return visitedPoints;
     }
 }
