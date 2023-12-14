@@ -119,6 +119,19 @@ export class XYZ {
         return orthogonal.concat( includeDiagonal ? diagonal : [] ).map( c => this.plus(c) );
     }
 
+    /** Returns the absolute straight-line distance from one point to another */
+    distanceTo( destination: Coordinate ): number {
+        const xyz = XYZ.normalize( destination );
+        // find the distance in the XY plane, then return the distance to the Z point using the XY distance as the leg of a right triangle
+        return Math.sqrt( (this.x - xyz.x)**2 + (this.y - xyz.y)**2 + (this.z - xyz.z)**2 );
+    }
+
+    /** Returns the absolute distance from one point to another using taxicab geometry */
+    taxicabDistanceTo( destination: Coordinate ): number {
+        const xyz = XYZ.normalize( destination );
+        return Math.abs( this.x - xyz.x ) + Math.abs( this.y - xyz.y ) + Math.abs( this.z - xyz.z );
+    }
+
     /** given a 2D or 3D array, returns the value at [y][x][z] in that array */
     valueIn<T>( arr: T[][] ): T;
     valueIn<T>( arr: T[][][] ): T;
@@ -133,7 +146,8 @@ export class XYZ {
 
     /**
      * Performs a breadth-first search starting at the point the method is called on.
-     * Returns the set of visited points. */
+     * Returns the set of visited points.
+     */
     bfs( options: IBfsOptions ) {
         const defaultOptions: IBfsOptions = {
             getNeighbors: p => p.neighbors(),

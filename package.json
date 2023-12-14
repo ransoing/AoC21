@@ -1,7 +1,7 @@
 {
-  "name": "aoc22",
+  "name": "aoc21",
   "version": "1.0.0",
-  "description": "Advent of Code 2022",
+  "description": "Advent of Code 2021",
   "main": "index.js",
   "scripts": {
     "solve": "func() { ts-node -O '{\"module\":\"commonjs\"}' src/day${1}/solution.ts; }; func",
@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/ransoing/AoC22#readme",
   "dependencies": {
+    "esm": "^3.2.25",
     "lodash": "^4.17.21",
+    "multilateration": "^0.6.2",
     "nerdamer": "^1.1.13",
     "node-dijkstra": "^2.5.0",
     "ts-node": "^10.9.1",
